@@ -59,7 +59,7 @@ void HAL_AVR_APM2::init(int argc, char * const argv[]) const {
     /* uartA is the serial port used for the console, so lets make sure
      * it is initialized at boot */
     uartA->begin(115200, 128, 128);
-    console->init((void*)uartA);
+    console->init((void*)uartB);  //change uartA to uartB by cdc 
     /* The AVR RCInput drivers take an AP_HAL_AVR::ISRRegistry*
      * as the init argument */
     rcin->init((void*)&isrRegistry);

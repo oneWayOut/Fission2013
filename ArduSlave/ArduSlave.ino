@@ -115,6 +115,11 @@
 #include "Parameters.h"
 #include "GCS.h"
 
+// cdc defined for slave mode
+uint8_t slaveMode = 1;
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // cliSerial
 ////////////////////////////////////////////////////////////////////////////////
@@ -884,6 +889,10 @@ void setup() {
 
     init_ardupilot();
 
+
+    //cdc
+    slaveUARTInit();
+
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], sizeof(scheduler_tasks)/sizeof(scheduler_tasks[0]));
 }
@@ -926,7 +935,12 @@ static void perf_update(void)
 
 void loop()
 {
-    uint32_t timer = micros();      //  cdc return us(Î¢ÃëÊý)
+    uint32_t timer = micros();      //  cdc return us(Î¢ï¿½ï¿½ï¿½ï¿½)
+
+    //cdc
+    if(slaveMode==1){
+    	recvMasterMsg();
+    }
 
     // We want this to execute fast
     // ----------------------------
@@ -943,7 +957,9 @@ void loop()
 
         // Execute the fast loop
         // ---------------------
+
         fast_loop();
+
 
         // tell the scheduler one tick has passed
         scheduler.tick();
@@ -951,7 +967,7 @@ void loop()
         uint16_t dt = timer - fast_loopTimer;
         if (dt < 10000) {
             uint16_t time_to_next_loop = 10000 - dt;
-            scheduler.run(time_to_next_loop);
+            scheduler.run(time_to_next_loop);   
         }
     }
 }
@@ -985,7 +1001,10 @@ static void fast_loop()
 
     // write out the servo PWM values
     // ------------------------------
-    set_servos_4();
+    //cdc add
+    if(slaveMode!=1){
+	    set_servos_4();
+    }
 
     // Inertial Nav
     // --------------------

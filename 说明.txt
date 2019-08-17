@@ -1,0 +1,7 @@
+
+1 两块板子主机程序为ArduMaster，从机为ArduSlave，通过更改libries\AP_Motors\MasterOrSlave.h
+  文件中宏定义来实现其配置；
+  
+2 增加的代码主要在文件MasterMode.ino及SlaveMode.ino中；
+  
+3 目前两块控制板均采用uartC通信，在软件中屏蔽了与地面站通信的部分.

@@ -9,6 +9,11 @@
  */
 
 #include "AP_MotorsOcta.h"
+#include "MasterOrSlave.h"  //cdc
+
+#if MY_BOARD_MODE == MASTER_MODE
+extern uint8_t masterMode;
+#endif
 
 // setup_motors - configures the motors for a octa
 void AP_MotorsOcta::setup_motors()
@@ -41,16 +46,25 @@ void AP_MotorsOcta::setup_motors()
 
     }
 	/*cdc defined OCTA Frame 2013*/
+#if MY_BOARD_MODE == MASTER_MODE
 	else if(_frame_orientation == AP_MOTORS_MY_OCTA){
-        add_motor_raw(AP_MOTORS_MOT_1, -0.33,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  1);
-        add_motor_raw(AP_MOTORS_MOT_2,  0.33, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  5);
-        add_motor_raw(AP_MOTORS_MOT_3,  -1.0,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 2);
-        add_motor_raw(AP_MOTORS_MOT_4, -0.33, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 4);
-        add_motor_raw(AP_MOTORS_MOT_5,  0.33,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 8);
-        add_motor_raw(AP_MOTORS_MOT_6,   1.0, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 6);
-        add_motor_raw(AP_MOTORS_MOT_7,   1.0,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  7);
-        add_motor_raw(AP_MOTORS_MOT_8,  -1.0, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  3);
+		if(masterMode==1){			
+	        add_motor_raw(AP_MOTORS_MOT_1, -0.33,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  1);
+	        add_motor_raw(AP_MOTORS_MOT_2,  0.33, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  5);
+	        add_motor_raw(AP_MOTORS_MOT_3,  -1.0,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 2);
+	        add_motor_raw(AP_MOTORS_MOT_4, -0.33, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 4);
+	        add_motor_raw(AP_MOTORS_MOT_5,  0.33,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 8);
+	        add_motor_raw(AP_MOTORS_MOT_6,   1.0, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 6);
+	        add_motor_raw(AP_MOTORS_MOT_7,   1.0,  1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  7);
+	        add_motor_raw(AP_MOTORS_MOT_8,  -1.0, -1.0, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  3);
+		}else{//模式切换后重新配置为四轴X模式
+	        add_motor(AP_MOTORS_MOT_5,   45, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
+	        add_motor(AP_MOTORS_MOT_6, -135, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 3);
+	        add_motor(AP_MOTORS_MOT_7,  -45, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
+	        add_motor(AP_MOTORS_MOT_2,  135, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
+		}
     }
+#endif
 	else {
         // X frame set-up
         add_motor(AP_MOTORS_MOT_1,   22.5, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  1);
