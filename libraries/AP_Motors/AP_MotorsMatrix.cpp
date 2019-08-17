@@ -262,11 +262,17 @@ void AP_MotorsMatrix::output_armed()
     }
 
     // send output to each motor
+    /*cdc change*/
+#if MY_BOARD_MODE == MASTER_MODE
+	for(i=0; i<4; i++){
+#else
     for( i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++ ) {
+#endif
         if( motor_enabled[i] ) {
             hal.rcout->write(_motor_to_channel_map[i], motor_out[i]);
         }
     }
+
 }
 
 // output_disarmed - sends commands to the motors

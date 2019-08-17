@@ -32,7 +32,7 @@ static void recvMasterMsg(void)
 	if(recvNum==9){		
 		thisRecvByte = hal.uartC->read();
 
-		//hal.uartA->printf("msgHead=0x%x;", thisRecvByte);
+	//	hal.uartA->printf("msgHead=0x%x;", thisRecvByte);
 		switch(thisRecvByte){
 		case 0xFF:  /*cdc the motor out msg package*/
 			for(ix=0; ix<4; ix++){
@@ -46,7 +46,7 @@ static void recvMasterMsg(void)
 				/*cdc for Serial port print debug*/
 				hal.uartA->printf("m%d=0x%x; ", ix+1, mymotor_out[ix]);
 			}			
-			hal.uartA->printf("\n");
+		//	hal.uartA->printf("\n");
 
 			hal.uartC->write(MYMSG_RQ);
 			
@@ -85,6 +85,7 @@ static void recvMasterMsg(void)
 			hal.uartC->flush();
 			hal.uartC->write(MYMSG_RQ);
 			preRecvTime = hal.scheduler->millis();
+			hal.uartA->printf("rqst msg ");
 		}		
 	}
 }

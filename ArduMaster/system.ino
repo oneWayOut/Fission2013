@@ -143,7 +143,7 @@ static void init_ardupilot()
     load_parameters();
 
     // init the GCS
-    gcs0.init(hal.uartB); // cdc change to uartB
+    gcs0.init(hal.uartA); // cdc change to uartB
 
     // Register the mavlink service callback. This will run
     // anytime there are more than 5ms remaining in a call to

@@ -9,31 +9,37 @@
       4 HAL_AVR_APM2_Class.cpp中console由uartA改为uartB，因uartB连接GPS, 不使用。
         但uartB未初始化，会不会因此而出错？
       5 调试阶段将slave工程中system.ino文件Init_ardupilot()中gcs0的uartA改为
-        uartB。暂时不可通过A串口与地面站连接，待调试完毕后，应改回；
+        uartB。暂时不可通过A串口与地面站连接，待调试完毕后，应改回(已改回)；
         主机也如此。
+2013.9
+      1 更改了主机模式下的AP_MotorsOcta.cpp中setup_motors()代码，更改了机架配置，
+        主机的电调输出通道为1，2，3，4通道，其他通道作为舵机等的输出
+        
+      2 删除了output_armed()中5,6,7,8通道的输出。（2013.9.4）
+      3 主机masterUARTInit中添加hal.rcout->set_freq( _BV(6), 50); 将输出的6,7,8通道
+        重新设置为50Hz，以将其输出至舵机。（2013.9.5）
+        
 
 
 注意事项:
 1 现阶段从机不为arm状态时，亦可从主机收到电机的消息，但此时可能无法传送给地面站
-  正确的电机输出(可能根本不传该数据);1 
+  正确的电机输出(可能根本不传该数据);
+2 设置输出频率时，1,2一起，3,4,5一起，6,7,8一起，目前电机仅使用1,2,3,4通道(490Hz)，
+  舵机使用6,7,8通道(50Hz)，5通道闲置;
 
 
 
-问题：
-1 Arduino编译器可能有些问题，AP_MotorsMatrix.cpp中头文件名称不对居然能编译通过；
-  在master工程中，头文件规定为slave模式，含未定义的变量slaveMode，居然有一次也
-　能编译通过。
 
-gcs_send_text_P()中gcs0.send_text_P(severity, str);
+  
 
-2 从机中若将fastloop屏蔽，红灯将不亮。后经调试发现：loop中一直进入
-  if (ins.num_samples_available() >= 2)分支中，另一个分支条件不满足，故得不到执行。
+  
 
-3 从机中，console初始化为uartB，启动时串口仍有打印字符，而串口为UARTA，
-  为什么？若如此，则主机初始化后可能发送很多字符给从机，超过9后，从机接受可能有问题
+  
+  
+  
+  
+  
 
-
-  有无可能C串口与gcs冲突的原因，usb与gcs的优先级
 
       
 

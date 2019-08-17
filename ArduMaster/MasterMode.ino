@@ -15,10 +15,13 @@ static uint8_t changeModeFlag = 0;
 
 static void masterUARTInit(void)
 {
+		/*重新设置6,7,8通道的pwm频率为50Hz*/
+	hal.rcout->set_freq( _BV(6), 50);  /*6=CH_7, 设置6,7,8*/	
+
+
 	hal.uartC->begin(115200, 8, 64);  /*baudRate, rxSpace, txSpace*/
 	hal.scheduler->delay(5);
 //	hal.uartA->begin(115200, 8, 64);  /*baudRate, rxSpace, txSpace*/
-	hal.scheduler->delay(5);
 
 	hal.uartA->printf("master\n");
 }
@@ -64,28 +67,35 @@ static void sendSlaveMsg(void)
 		hal.uartC->flush();
 	}	
 
+
+		/*roll通道的输出至舵机测试, cdc test*/
+	//hal.rcout->write(6, g.rc_1.radio_out);	
+
 }
 
  
 /***********************************************************************************
-my octa frame: 7,2,1,8 motors are clockwise
+original octa frame
+
    7------5------1------3
           |      |
           |      |
    6------2------4------8
-master left side change to quad X frame, right side is controlled by slave board
-   7------5          3------1
-          | changeto |      |
-          |          |      |
-   6------2          2------4
+
+
+new my octa frame: 3,4,7,8 motors are clockwise
+   3------1------7------5
+          |      |
+          |      |
+   2------4------6------8
 *************************************************************************************/
 /*set output to mymotor_out[4]
  */
 static void setMyMotorOut(void)
 {
-	mymotor_out[0] = motors.motor_out[2];
-	mymotor_out[1] = motors.motor_out[3];
-	mymotor_out[2] = motors.motor_out[0];
+	mymotor_out[0] = motors.motor_out[4];
+	mymotor_out[1] = motors.motor_out[5];
+	mymotor_out[2] = motors.motor_out[6];
 	mymotor_out[3] = motors.motor_out[7];
 }
 
