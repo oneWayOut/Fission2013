@@ -10,6 +10,7 @@ static void read_control_switch()
     if (oldSwitchPosition != switchPosition) {
         switch_counter++;
         if(switch_counter >= CONTROL_SWITCH_COUNTER) {
+#if 0  /*从机不切换到固定翼模式了*/
         	//cdc add	
         	if(oldSwitchPosition==0){
         		if(myflightMode==1)
@@ -18,6 +19,7 @@ static void read_control_switch()
         		if(switchPosition<oldSwitchPosition && myflightMode==2)
         			change2QuadMode();		
         	}
+#endif
 
         
             oldSwitchPosition       = switchPosition;

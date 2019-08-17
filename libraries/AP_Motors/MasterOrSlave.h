@@ -4,6 +4,6 @@
 #define SLAVE_MODE  0
 #define MASTER_MODE 1
 
-#define MY_BOARD_MODE 1  /*APM板为从机时为0，为主机时为1*/
+#define MY_BOARD_MODE 0  /*APM板为从机时为0，为主机时为1*/
 
-#endif
+#endif 

@@ -49,7 +49,7 @@ static void recvMasterMsg(void)
 				hal.rcout->write(ix, mymotor_out[ix]);
 
 				/*cdc for Serial port print debug*/
-				hal.uartA->printf("m%d=0x%x; ", ix+1, mymotor_out[ix]);
+			//	hal.uartA->printf("m%d=0x%x; ", ix+1, mymotor_out[ix]);
 			}			
 		//	hal.uartA->printf("\n");
 
@@ -64,7 +64,7 @@ static void recvMasterMsg(void)
 		case 0xFA: /*change the slave to a quad alone*/
 			hal.uartC->flush();
 			
-			hal.uartA->printf("recv change mode msg ");
+			//hal.uartA->printf("recv change mode msg ");
 			
 			change2QuadMode();
 
@@ -88,7 +88,7 @@ static void recvMasterMsg(void)
 			hal.uartC->flush();
 			hal.uartC->write(MYMSG_RQ);
 			preRecvTime = hal.scheduler->millis();
-			hal.uartA->printf("rqst msg ");
+			//hal.uartA->printf("rqst msg ");
 		}		
 	}
 }
@@ -97,6 +97,7 @@ static void recvMasterMsg(void)
 /**************************************************
 
 **************************************************/
+#if 0
 static void change2PlaneMode(void)
 {
 	myflightMode = 2;
@@ -104,6 +105,7 @@ static void change2PlaneMode(void)
 	
 	myLED_count = mainLoop_count;
 }
+#endif
 
 
 /**************************************************
