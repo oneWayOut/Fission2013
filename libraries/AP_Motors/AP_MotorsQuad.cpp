@@ -10,6 +10,13 @@
 
 #include "AP_MotorsQuad.h"
 
+#include "MasterOrSlave.h"  //cdc
+
+#if MY_BOARD_MODE == SLAVE_MODE
+extern uint8_t myflightMode;
+#endif
+
+
 // setup_motors - configures the motors for a quad
 void AP_MotorsQuad::setup_motors()
 {
@@ -36,10 +43,27 @@ void AP_MotorsQuad::setup_motors()
         add_motor(AP_MOTORS_MOT_3,  -45, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  4);
         add_motor(AP_MOTORS_MOT_4,  135, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  2);
     }else{
-        // X frame set-up
+#if MY_BOARD_MODE == SLAVE_MODE
+		if(myflightMode==1){//模式切换后重新配置为四轴X模式
+			add_motor(AP_MOTORS_MOT_1,	 45, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
+			add_motor(AP_MOTORS_MOT_2, -135, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 3);
+			add_motor(AP_MOTORS_MOT_3,	-45, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
+			add_motor(AP_MOTORS_MOT_4,	135, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
+		}
+		else if(myflightMode==2){
+			/*配置为单机半固定翼模式，电机倾转30度*/
+			/*注意yawfactor, 0.2为电机旋向贡献的量，1.0为电机在左右侧推力贡献的量*/
+			add_motor_raw(AP_MOTORS_MOT_1,	-1.0,  1.0, -1.0+0.2, 8);
+			add_motor_raw(AP_MOTORS_MOT_2,	 1.0, -1.0,  1.0+0.2, 6);
+			add_motor_raw(AP_MOTORS_MOT_3,	 1.0,  1.0,  1.0-0.2,  7);
+			add_motor_raw(AP_MOTORS_MOT_4,	-1.0, -1.0, -1.0-0.2,  5);
+		}else ;
+#else
+		// X frame set-up
         add_motor(AP_MOTORS_MOT_1,   45, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
         add_motor(AP_MOTORS_MOT_2, -135, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 3);
         add_motor(AP_MOTORS_MOT_3,  -45, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
         add_motor(AP_MOTORS_MOT_4,  135, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
+#endif
     }
 }

@@ -2,25 +2,26 @@
       cdc  add for Master APM code
 ****************************************/
 #include <MasterOrSlave.h>
-
 #if MY_BOARD_MODE == MASTER_MODE
 
 #define MYMSG_RQ   0xA5     /*request for master msg*/
 #define MYMSG_NACK 0xA7     /*nack master*/
 
-static int16_t mymotor_out[4] = {0,0,0,0};
+static int16_t mymotor_out[4] = {0,0,0,0}; 
 
-static uint8_t changeModeFlag = 0;
+static uint8_t changeModeFlag = 0;  /*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Ä±ï¿½ï¿½ï¿½Ä£Ê½*/
+
+static int16_t myLED_count = 0;
 
 
 static void masterUARTInit(void)
 {
-		/*ÖØÐÂÉèÖÃ6,7,8Í¨µÀµÄpwmÆµÂÊÎª50Hz*/
-	hal.rcout->set_freq( _BV(6), 50);  /*6=CH_7, ÉèÖÃ6,7,8*/	
+	/*ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½6,7,8Í¨ï¿½ï¿½ï¿½ï¿½pwmÆµï¿½ï¿½Îª50Hz*/
+	hal.rcout->set_freq( _BV(6), 50);  /*6=CH_7, ï¿½ï¿½ï¿½ï¿½6,7,8*/	
 
 
 	hal.uartC->begin(115200, 8, 64);  /*baudRate, rxSpace, txSpace*/
-	hal.scheduler->delay(5);
+	hal.scheduler->delay(2);
 //	hal.uartA->begin(115200, 8, 64);  /*baudRate, rxSpace, txSpace*/
 
 	hal.uartA->printf("master\n");
@@ -40,15 +41,16 @@ static void sendSlaveMsg(void)
 		case MYMSG_RQ:
 			if(changeModeFlag == 0){
 				hal.uartC->write(0xFF);
-			}else{  /*Í¨Öª´Ó»úÇÐ»»Ä£Ê½£¬Í¬Ê±ÉèÖÃÖ÷»úÄ£Ê½*/
+			}else{  /*Í¨Öªï¿½Ó»ï¿½ï¿½Ð»ï¿½Ä£Ê½ï¿½ï¿½Í¬Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½*/
 				hal.uartC->write(0xFA);
-				masterMode = 0;
+				sendMsgFlag = 0;  /*ï¿½ï¿½ï¿½Ù·ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ó»ï¿½*/
+				changeModeFlag = 0;
 			}
 
 			setMyMotorOut();
 			
 			for(ix=0; ix<4; ix++){
-				sendByte = (mymotor_out[ix]&0xFF00)>>8;
+				sendByte = (mymotor_out[ix]&0xFF00)>>8;/*È¡¸ßÎ»*/
 				hal.uartC->write(sendByte);
 				sendByte = (mymotor_out[ix]&0xFF);
 				hal.uartC->write(sendByte);		
@@ -62,13 +64,12 @@ static void sendSlaveMsg(void)
 	}
 		
 
-	/*Çå¿ÕÎ´¶ÁÍêµÄ·ÏÊý¾Ý*/
+	/*ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½*/
 	if(hal.uartC->available()>=1){
 		hal.uartC->flush();
 	}	
 
-
-		/*rollÍ¨µÀµÄÊä³öÖÁ¶æ»ú²âÊÔ, cdc test*/
+		/*rollÍ¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, cdc test*/
 	//hal.rcout->write(6, g.rc_1.radio_out);	
 
 }
@@ -100,18 +101,90 @@ static void setMyMotorOut(void)
 }
 
 /**************************************************
-Ä£Ê½ÇÐ»»£¬·ÖÀëÊ±ÐèÒª½øÐÐµÄ¹¤×÷:
-1 ÖØÐÂÉèÖÃ»ú¼ÜÅäÖÃ£¬×ª»»ÎªËÄÖáÄ£Ê½£»
-2 ·¢ËÍÏûÏ¢¸ø´Ó»ú£¬Í¨ÖªÆäÄ£Ê½×ª»»
+Ä£Ê½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¨Îªï¿½Ì¶ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Òªï¿½ï¿½ï¿½ÐµÄ¹ï¿½ï¿½ï¿½:
+1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½
+2 ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 **************************************************/
-static void changeMasterMode(void)
-{	
-	/*¸ÄÐ´ÁËAP_MotorsOcta.cppÖÐµÄsetup_motorsº¯Êý*/
-	masterMode = 0;
+static void change2PlaneMode(void)
+{
+	myflightMode = 2;
 	motors.setup_motors();
-	masterMode = 1;
-
-	changeModeFlag = 1;	
+	
+	myLED_count = mainLoop_count;
 }
+
+
+/**************************************************
+Ä£Ê½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îª4ï¿½á£¬ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Òªï¿½ï¿½ï¿½ÐµÄ¹ï¿½ï¿½ï¿½:
+1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½
+2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+3 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Ó»ï¿½Í¨Öªï¿½ï¿½Ä£Ê½×ªï¿½ï¿½
+**************************************************/
+static void change2QuadMode(void)
+{	
+	/*ï¿½ï¿½Ð´ï¿½ï¿½AP_MotorsOcta.cppï¿½Ðµï¿½setup_motorsï¿½ï¿½ï¿½ï¿½*/
+	myflightMode = 1;
+	motors.setup_motors();
+	changeModeFlag = 1;	
+	
+	myLED_count = mainLoop_count;
+}
+
+
+#define CH_AILERON 5  /*ï¿½ï¿½ï¿½ï¿½*/
+#define CH_VERT    6  /*ï¿½ï¿½×ªï¿½ï¿½ï¿½*/
+#define CH_MAG     7  /*ï¿½ï¿½ï¿½ï¿½ï¿½*/
+
+/*ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+#define AWAY_SERVO_OUT  1015
+#define CNNT_SERVO_OUT  1941
+
+/*ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±Î»ï¿½Ãºï¿½Ë®Æ½Î»ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½×ªï¿½Ç¾Ý´Ë¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*/
+#define VERTICAL_SERVO_OUT 2078
+#define HORIZON_SERVO_OUT  1237
+
+/*ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½*/
+#define AILERON_MID_OUT 1520
+
+/*ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½*/
+static void sendServoLockOut()
+{
+	switch(myflightMode)
+	{
+	case 0:
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT);
+		hal.rcout->write(CH_VERT,    VERTICAL_SERVO_OUT);
+		hal.rcout->write(CH_MAG,     CNNT_SERVO_OUT);	
+		break;		
+	case 1:
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT);
+		hal.rcout->write(CH_VERT,    VERTICAL_SERVO_OUT);
+		hal.rcout->write(CH_MAG,     AWAY_SERVO_OUT);
+		break;
+	case 2: /*ï¿½Ù¶ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½Í¨ï¿½ï¿½Ò£ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ÏµÖ±ï¿½ï¿½ï¿½ï¿½ï¿½*/
+		hal.rcout->write(CH_VERT,    (VERTICAL_SERVO_OUT*2+HORIZON_SERVO_OUT)/3);//angle=30
+
+		/*Ö±ï¿½Ó½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½*/
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT + (g.rc_1.radio_in - g.rc_1.radio_trim)); 
+		//hal.rcout->write(CH_MAG,     AWAY_SERVO_OUT);
+		break;
+	}
+}
+
+static void myLED_hint(void)
+{
+	static uint8_t flag = 0;
+	if(mainLoop_count-myLED_count<300)  /*ï¿½ï¿½Ë¸ï¿½ï¿½ï¿½ï¿½*/
+	{
+		flag = !flag;
+		if (flag) {
+		    digitalWriteFast(C_LED_PIN, LED_OFF);
+		}else{
+		    digitalWriteFast(C_LED_PIN, LED_ON);
+		}
+	}
+}
+
 
 #endif

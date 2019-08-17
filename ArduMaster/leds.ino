@@ -5,7 +5,8 @@ static void update_lights()
     switch(led_mode) {
     case NORMAL_LEDS:
         update_motor_light();
-        update_GPS_light();
+        //update_GPS_light();  cdc change 
+        myLED_hint();
         break;
 
     case SAVE_TRIM_LEDS:

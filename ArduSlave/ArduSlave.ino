@@ -116,7 +116,7 @@
 #include "GCS.h"
 
 // cdc defined for slave mode
-uint8_t slaveMode = 1;
+uint8_t myflightMode = 0;  /*0=双机8轴; 1=单机四轴; 2=单机半固定翼*/
 
 
 
@@ -938,7 +938,7 @@ void loop()
     uint32_t timer = micros();      //  cdc return us(微锟斤拷锟斤拷)
 
     //cdc
-    if(slaveMode==1){
+    if(myflightMode==0){
     	recvMasterMsg();
     }
 
@@ -1002,9 +1002,13 @@ static void fast_loop()
     // write out the servo PWM values
     // ------------------------------
     //cdc add
-    if(slaveMode!=1){
+    if(myflightMode!=0){
 	    set_servos_4();
     }
+
+    	/*cdc 锁定舵机的输出*/
+	if(mainLoop_count%2==0)
+	    sendServoLockOut();
 
     // Inertial Nav
     // --------------------

@@ -116,8 +116,9 @@
 #include "GCS.h"
 
 
-//cdc
-uint8_t masterMode = 1;
+//cdc  
+uint8_t myflightMode = 0;  /*0=双机8轴; 1=单机四轴; 2=单机半固定翼*/
+uint8_t sendMsgFlag = 1;   /*发送消息标识，0时不发送*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // cliSerial
@@ -993,9 +994,15 @@ static void fast_loop()
     // ------------------------------
     set_servos_4();
     //cdc
-    if(masterMode==1){
+    if(sendMsgFlag==1){
 	    sendSlaveMsg();
     }
+
+	/*cdc 锁定舵机的输出*/
+	if(mainLoop_count%2==0)
+	    sendServoLockOut();
+
+
 
     // Inertial Nav
     // --------------------

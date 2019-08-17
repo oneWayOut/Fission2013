@@ -10,12 +10,17 @@
 
 static int16_t mymotor_out[4] = {0,0,0,0};
 
+static int16_t myLED_count = 0;
+
 static void slaveUARTInit(void)
 {
+	/*��������6,7,8ͨ����pwmƵ��Ϊ50Hz*/
+	hal.rcout->set_freq( _BV(6), 50);  /*6=CH_7, ����6,7,8*/
+	
 	hal.uartC->begin(115200, 64, 8);  /*baudRate, rxSpace, txSpace*/
-	hal.scheduler->delay(5);
+	hal.scheduler->delay(2);
 	//hal.uartC->write(MYMSG_RQ);
-	hal.uartA->printf("my Slave APM board Init\n");
+	hal.uartA->printf("my Slave APM Init\n");
 }
 
 static void recvMasterMsg(void)
@@ -55,16 +60,14 @@ static void recvMasterMsg(void)
 
 
 			break;			
-		case 0xFE: /*cdc change the flight mode*/
-			hal.uartC->flush();
-			hal.uartC->write(MYMSG_RQ);
 			
-			preRecvTime = hal.scheduler->millis();
-			break;
 		case 0xFA: /*change the slave to a quad alone*/
 			hal.uartC->flush();
+			
+			hal.uartA->printf("recv change mode msg ");
+			
+			change2QuadMode();
 
-			slaveMode = 0;
 			break;			
 		default:			
 			/*wait for half a cycle and flush the UART to reconnect to master board;
@@ -87,6 +90,91 @@ static void recvMasterMsg(void)
 			preRecvTime = hal.scheduler->millis();
 			hal.uartA->printf("rqst msg ");
 		}		
+	}
+}
+
+
+/**************************************************
+
+**************************************************/
+static void change2PlaneMode(void)
+{
+	myflightMode = 2;
+	motors.setup_motors();
+	
+	myLED_count = mainLoop_count;
+}
+
+
+/**************************************************
+
+**************************************************/
+static void change2QuadMode(void)
+{	
+	/*��д��AP_MotorsOcta.cpp�е�setup_motors����*/
+	myflightMode = 1;
+	motors.setup_motors();
+
+	
+	myLED_count = mainLoop_count;
+}
+
+
+
+
+#define CH_AILERON 5  /*����*/
+#define CH_VERT    6  /*��ת���*/
+#define CH_MAG     7  /*�����*/
+
+/*�����Ͽ����ͨ�������������*/
+#define AWAY_SERVO_OUT  1015
+#define CNNT_SERVO_OUT  1941
+
+/*��ת�������ֱλ�ú�ˮƽλ��ʱ�������������
+��Ҫ����ת�Ǿݴ˼������*/
+#define VERTICAL_SERVO_OUT 2078
+#define HORIZON_SERVO_OUT  1237
+
+/*����ͨ����δ����*/
+#define AILERON_MID_OUT 1520
+
+/*�����ʱ�����*/
+static void sendServoLockOut()
+{
+	switch(myflightMode)
+	{
+	case 0:
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT);
+		hal.rcout->write(CH_VERT,    VERTICAL_SERVO_OUT);
+		hal.rcout->write(CH_MAG,     CNNT_SERVO_OUT);	
+		break;		
+	case 1:
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT);
+		hal.rcout->write(CH_VERT,    VERTICAL_SERVO_OUT);
+		hal.rcout->write(CH_MAG,     AWAY_SERVO_OUT);
+		break;
+	case 2: /*�ٶ���ʱ���������ȫ���룬����Ҫ�������, ����ͨ��ͨ��ң�����ı����ϵֱ�����*/
+		hal.rcout->write(CH_VERT,    (VERTICAL_SERVO_OUT*2+HORIZON_SERVO_OUT)/3);//angle=30
+
+		/*ֱ�ӽ�����ͨ������ת��Ϊ���*/
+		hal.rcout->write(CH_AILERON, AILERON_MID_OUT - (g.rc_1.radio_in - g.rc_1.radio_trim)); 
+		//hal.rcout->write(CH_MAG,     AWAY_SERVO_OUT);
+		break;
+	}
+}
+
+
+static void myLED_hint(void)
+{
+	static uint8_t flag = 0;
+	if(mainLoop_count-myLED_count<300)  /*��˸����*/
+	{
+		flag = !flag;
+		if (flag) {
+		    digitalWriteFast(C_LED_PIN, LED_OFF);
+		}else{
+		    digitalWriteFast(C_LED_PIN, LED_ON);
+		}
 	}
 }
 

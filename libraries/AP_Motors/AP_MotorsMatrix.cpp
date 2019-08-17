@@ -10,6 +10,9 @@
 #include <AP_HAL.h>
 #include "AP_MotorsMatrix.h"
 
+#include "MasterOrSlave.h"  //cdc
+
+
 extern const AP_HAL::HAL& hal;
 
 // Init
@@ -80,12 +83,22 @@ void AP_MotorsMatrix::output_min()
     int8_t i;
 
     // fill the motor_out[] array for HIL use and send minimum value to each motor
-    for( i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++ ) {
-        if( motor_enabled[i] ) {
-            motor_out[i] = _rc_throttle->radio_min;
-            hal.rcout->write(_motor_to_channel_map[i], motor_out[i]);
-        }
-    }
+//cdc change
+#ifdef MY_BOARD_MODE
+	for( i=0; i<4; i++ ) {
+		if( motor_enabled[i] ) {
+			motor_out[i] = _rc_throttle->radio_min;
+			hal.rcout->write(_motor_to_channel_map[i], motor_out[i]);
+		}
+	}
+#else
+	for( i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++ ) {
+		if( motor_enabled[i] ) {
+			motor_out[i] = _rc_throttle->radio_min;
+			hal.rcout->write(_motor_to_channel_map[i], motor_out[i]);
+		}
+	}
+#endif
 }
 
 // output_armed - sends commands to the motors

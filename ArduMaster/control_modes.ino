@@ -10,10 +10,24 @@ static void read_control_switch()
     if (oldSwitchPosition != switchPosition) {
         switch_counter++;
         if(switch_counter >= CONTROL_SWITCH_COUNTER) {
-			if(oldSwitchPosition==0 && motors.armed()){
-				//cdc add 仅在准备好时执行模式切换操作
-				changeMasterMode();
-			}
+        //cdc assume ch5 have 3 positions, lowest = 0
+        // attention: each time change no more than one
+        	// begin cdc add 
+        	if(oldSwitchPosition==0){
+        		if(myflightMode==0){//change first time only
+	        		change2QuadMode(); //change from octa to quad away
+        		}
+        	}else{
+        		if(switchPosition>oldSwitchPosition){
+        			change2PlaneMode();   //change quad to plane     			
+        		}else{
+        			if(myflightMode==2){ //change plane to quad 
+	        			change2QuadMode();
+        			}
+        		}
+        	} 
+        	//end cdc add
+	
         
             oldSwitchPosition       = switchPosition;
             switch_counter          = 0;
@@ -21,7 +35,6 @@ static void read_control_switch()
             // ignore flight mode changes if in failsafe
             if( !ap.failsafe_radio ) {
                 set_mode(flight_modes[switchPosition]);
-
                 if(g.ch7_option != CH7_SIMPLE_MODE) {
                     // set Simple mode using stored paramters from Mission planner
                     // rather than by the control switch
